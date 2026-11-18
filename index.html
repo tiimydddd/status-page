@@ -6,18 +6,20 @@
   <title>STCA 同學手機 Service Health Status</title>
   <style>
     :root {
-      --bg: #f4f6f9;
+      --navy: #191b1d;
+      --navy-2: #232527;
+      --bg: #f2f4f5;
       --card: #ffffff;
-      --text: #1f2328;
-      --muted: #59636e;
-      --border: #d8dee4;
-      --primary: #0969da;
-      --green: #1a7f37;
-      --green-bg: #dafbe1;
-      --yellow: #9a6700;
-      --yellow-bg: #fff8c5;
-      --red: #cf222e;
-      --red-bg: #ffebe9;
+      --text: #191b1d;
+      --muted: #60656c;
+      --border: #dfe3e8;
+      --ok: #00b06f;
+      --ok-bg: #e6f7f0;
+      --warn: #f5a623;
+      --warn-bg: #fff6e5;
+      --down: #e2231a;
+      --down-bg: #fdebec;
+      --link: #0066ff;
     }
     * { box-sizing: border-box; }
     body {
@@ -25,93 +27,707 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.5;
     }
-    .container {
-      max-width: 780px;
-      margin: 32px auto;
-      padding: 0 16px;
-    }
-    header {
-      margin-bottom: 20px;
-    }
-    h1 {
-      margin: 0 0 6px;
-      font-size: 24px;
-    }
-    .subtitle {
-      font-size: 14px;
-      color: var(--muted);
-    }
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .tab-btn {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      padding: 8px 16px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .tab-btn:hover {
-      border-color: var(--primary);
-    }
-    .tab-btn.active {
-      background: var(--primary);
-      border-color: var(--primary);
+
+    /* 頂部深色頁首（仿 Roblox Status） */
+    .topbar {
+      background: var(--navy);
       color: #ffffff;
+      padding: 20px 16px;
+      border-bottom: 1px solid #393b3d;
     }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-    .card-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
+    .topbar-inner {
+      max-width: 920px;
+      margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px;
-      background: #fafbfc;
-    }
-    .student-title {
-      font-size: 18px;
-      font-weight: 700;
-    }
-    .service-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--border);
       gap: 12px;
     }
-    .service-row:last-child {
-      border-bottom: none;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    .service-name {
-      font-weight: 600;
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ffffff 0%, #c8cdd2 100%);
+      color: var(--navy);
+      font-weight: 900;
+      font-size: 15px;
+      display: grid;
+      place-items: center;
+      letter-spacing: -0.5px;
     }
-    .service-desc {
+    .brand-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .brand-sub {
+      font-size: 12px;
+      color: #b8bdc2;
+    }
+    .updated-pill {
+      font-size: 12px;
+      background: var(--navy-2);
+      border: 1px solid #393b3d;
+      padding: 6px 12px;
+      border-radius: 6px;
+      color: #d6dadf;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 24px auto 48px;
+      padding: 0 16px;
+    }
+
+    /* 整體狀態橫幅 */
+    .overall-banner {
+      padding: 16px 20px;
+      border-radius: 8px;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 17px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .overall-banner.ok { background: var(--ok); }
+    .overall-banner.warn { background: var(--warn); }
+    .overall-banner.down { background: var(--down); }
+    .overall-sub {
       font-size: 13px;
+      font-weight: 500;
+      opacity: 0.95;
+    }
+
+    /* 區塊標題 */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 26px 0 12px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    .toggle-all {
+      font-size: 13px;
+      color: var(--link);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 4px 8px;
+    }
+    .toggle-all:hover { text-decoration: underline; }
+
+    /* 進行中事件卡片 */
+    .incident-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--down);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+    }
+    .incident-card.warn { border-left-color: var(--warn); }
+    .incident-card.ok { border-left-color: var(--ok); }
+    .incident-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .incident-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .incident-item {
+      padding: 8px 0;
+      border-top: 1px solid #eef0f2;
+      font-size: 14px;
+    }
+    .incident-time {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--down);
+      margin-bottom: 2px;
+    }
+    .incident-link {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--link);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .incident-link:hover { text-decoration: underline; }
+
+    /* 可展開同學分類面板 */
+    .group-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .group-header {
+      width: 100%;
+      background: var(--card);
+      border: none;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+    }
+    .group-header:hover { background: #fafbfc; }
+    .group-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chevron {
+      font-size: 12px;
       color: var(--muted);
+      transition: transform 0.2s;
+      display: inline-block;
+      width: 14px;
     }
-    .badge {
-      padding: 4px 12px;
-      border-radius: 999px;
+    .group-card.open .chevron { transform: rotate(90deg); }
+    .group-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .group-tag {
+      font-size: 12px;
+      color: var(--muted);
+      background: #eef1f4;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
       white-space: nowrap;
     }
-    .badge
+    .status-pill.ok { background: var(--ok-bg); color: #007a4d; }
+    .status-pill.warn { background: var(--warn-bg); color: #9c6200; }
+    .status-pill.down { background: var(--down-bg); color: #b51912; }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot.ok { background: var(--ok); }
+    .dot.warn { background: var(--warn); }
+    .dot.down { background: var(--down); }
+
+    .group-body {
+      display: none;
+      border-top: 1px solid var(--border);
+      background: #fcfcfd;
+    }
+    .group-card.open .group-body { display: block; }
+
+    .service-row {
+      padding: 14px 20px 14px 44px;
+      border-bottom: 1px solid #eef0f2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .service-row:last-child { border-bottom: none; }
+    .svc-info { min-width: 180px; }
+    .svc-name { font-weight: 600; font-size: 14px; }
+    .svc-desc { font-size: 12px; color: var(--muted); }
+
+    /* 狀態長條圖（仿 Roblox Status / Status.io） */
+    .svc-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-left: auto;
+    }
+    .uptime-bars {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+    .bar {
+      width: 4px;
+      height: 18px;
+      border-radius: 2px;
+      background: var(--ok);
+    }
+    .bar.warn { background: var(--warn); }
+    .bar.down { background: var(--down); }
+    .svc-status-text {
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 110px;
+      text-align: right;
+    }
+    .svc-status-text.ok { color: #007a4d; }
+    .svc-status-text.warn { color: #9c6200; }
+    .svc-status-text.down { color: #b51912; }
+
+    /* 圖例列 */
+    .legend {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 16px;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 歷史事件紀錄 */
+    .history-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+    }
+    .history-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #eef0f2;
+    }
+    .history-item:first-child { padding-top: 0; }
+    .history-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .history-date {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .history-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 2px 0 4px;
+    }
+    .history-detail {
+      font-size: 13px;
+      color: #3a3f45;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 32px;
+    }
+
+    @media (max-width: 600px) {
+      .service-row { padding-left: 20px; }
+      .uptime-bars { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">STCA</div>
+        <div>
+          <h1 class="brand-title">STCA 同學手機 Service Health Status</h1>
+          <div class="brand-sub">即時服務健康與外部系統通報頁面</div>
+        </div>
+      </div>
+      <div class="updated-pill">最後更新：<span id="last-updated"></span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="overall-banner" class="overall-banner"></div>
+
+    <div class="section-header">
+      <h2 class="section-title">進行中事件（Active Incidents）</h2>
+    </div>
+    <div id="active-incidents"></div>
+
+    <div class="section-header">
+      <h2 class="section-title">同學手機服務狀態（System Components）</h2>
+      <button id="toggle-all-btn" class="toggle-all" type="button">全部展開 / 收合</button>
+    </div>
+    <div id="groups-list"></div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="dot ok"></span> 正常運作（Operational）</span>
+      <span class="legend-item"><span class="dot warn"></span> 部分異常 / 維護中（Degraded）</span>
+      <span class="legend-item"><span class="dot down"></span> 服務中斷（Service Disruption）</span>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title">近期事件紀錄（Incident History）</h2>
+    </div>
+    <div id="history-list" class="history-card"></div>
+
+    <footer>STCA 同學手機 Service Health Status • Powered by GitHub Pages</footer>
+  </main>
+
+  <script>
+    // =====================================================
+    // 【每次要更新狀態，只需要修改這裡的 CONFIG】
+    // status 可用值：
+    //   "ok"   -> 正常運作（綠燈）
+    //   "warn" -> 部分異常 / 維護中（黃燈）
+    //   "down" -> 服務中斷（紅燈）
+    // =====================================================
+    const CONFIG = {
+      lastUpdated: "2026-11-18 11:24 (UTC+8)",
+      bannerSubText: "受影響：永晞、明曦（Apple）／ 芯而（預計 12:00 全線正常）",
+
+      // 進行中事件（如果沒有進行中事件，可設為空陣列 []）
+      activeIncidents: [
+        {
+          type: "down",
+          title: "芯而手機服務中斷（換機中）",
+          badge: "預計 12:00 全線正常",
+          items: [
+            {
+              time: "進行中 - 預計今日中午 12:00 全線正常",
+              detail: "目前因硬件故障換機中，通訊 Apps 與遊戲狀態暫時中斷；新機預計 12:00 送達並恢復全線正常。"
+            }
+          ]
+        },
+        {
+          type: "down",
+          title: "App Store Connect - 2 次服務中斷（影響：永晞、明曦）",
+          badge: "持續進行中",
+          items: [
+            {
+              time: "今天凌晨 2:57 - 持續進行中（所有用戶均受影響）",
+              detail: "用戶在使用此服務時遇到問題。我們正在努力解決此問題。"
+            },
+            {
+              time: "今天凌晨 12:50 - 持續進行中（所有用戶均受影響）",
+              detail: "用戶在使用此服務時遇到問題。我們正在努力解決此問題。"
+            }
+          ],
+          linkText: "查看 Apple Developer System Status 官方頁面 ↗",
+          linkUrl: "https://developer.apple.com/system-status/"
+        }
+      ],
+
+      // 各同學分組（像 Roblox Status 的分類面板）
+      groups: [
+        {
+          name: "岳林",
+          tag: "正常運作",
+          openByDefault: false,
+          services: [
+            { name: "通訊 Apps", desc: "WhatsApp / Instagram / WeChat", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "一般連線與娛樂應用", status: "ok", label: "正常運作" }
+          ]
+        },
+        {
+          name: "永晞",
+          tag: "Apple 用戶",
+          openByDefault: true,
+          services: [
+            { name: "通訊 Apps", desc: "日常訊息與聯絡", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "一般連線與娛樂應用", status: "ok", label: "正常運作" },
+            { name: "Apple 專屬服務", desc: "受 App Store Connect 2 次服務中斷影響", status: "down", label: "服務中斷" }
+          ]
+        },
+        {
+          name: "芯而",
+          tag: "預計 12:00 全線正常",
+          openByDefault: true,
+          services: [
+            { name: "通訊 Apps", desc: "換機中目前中斷，預計今日 12:00 全線正常", status: "down", label: "中斷 (換機中)" },
+            { name: "遊戲狀態", desc: "換機中目前中斷，預計今日 12:00 全線正常", status: "down", label: "中斷 (換機中)" }
+          ]
+        },
+        {
+          name: "明曦",
+          tag: "Apple 用戶",
+          openByDefault: true,
+          services: [
+            { name: "通訊 Apps", desc: "日常訊息與聯絡", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "一般連線與娛樂應用", status: "ok", label: "正常運作" },
+            { name: "Apple 專屬服務", desc: "受 App Store Connect 2 次服務中斷影響", status: "down", label: "服務中斷" }
+          ]
+        },
+        {
+          name: "TIMMY",
+          tag: "正常運作",
+          openByDefault: false,
+          services: [
+            { name: "通訊 Apps", desc: "日常訊息與聯絡", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "一般連線與娛樂應用", status: "ok", label: "正常運作" }
+          ]
+        }
+      ],
+
+      // 歷史紀錄
+      history: [
+        {
+          date: "2026年11月18日（進行中）",
+          title: "【進行中】芯而硬件故障換機中（預計 12:00 全線正常）",
+          detail: "目前手機服務暫時中斷，預計於今日中午 12:00 完成換機並全線恢復正常。"
+        },
+        {
+          date: "2026年11月18日 02:57 & 00:50",
+          title: "【進行中】App Store Connect - 2 次服務中斷",
+          detail: "Apple 官方通報所有用戶均受影響（永晞、明曦之 Apple 專屬服務可能受波及）。"
+        }
+      ]
+    };
+
+    // ======= 畫面自動產生程式（以下通常無需修改） =======
+    const PRIORITY = { ok: 0, warn: 1, down: 2 };
+    const GROUP_LABEL = {
+      ok: "全線正常（Operational）",
+      warn: "部分異常（Degraded）",
+      down: "服務中斷（Disruption）"
+    };
+
+    document.getElementById("last-updated").textContent = CONFIG.lastUpdated;
+
+    // 計算整體狀態
+    let overall = "ok";
+    for (const g of CONFIG.groups) {
+      for (const s of g.services) {
+        if (PRIORITY[s.status] > PRIORITY[overall]) overall = s.status;
+      }
+    }
+
+    const bannerEl = document.getElementById("overall-banner");
+    bannerEl.className = "overall-banner " + overall;
+    const bannerText = {
+      ok: "所有系統與同學手機服務運作正常",
+      warn: "部分服務出現延遲或維護中",
+      down: "部分服務目前發生中斷（Service Disruption）"
+    };
+    const bannerMain = document.createElement("span");
+    bannerMain.textContent = bannerText[overall];
+    const bannerSub = document.createElement("span");
+    bannerSub.className = "overall-sub";
+    bannerSub.textContent = CONFIG.bannerSubText;
+    bannerEl.appendChild(bannerMain);
+    bannerEl.appendChild(bannerSub);
+
+    // 進行中事件
+    const incidentsEl = document.getElementById("active-incidents");
+    if (CONFIG.activeIncidents.length === 0) {
+      const card = document.createElement("div");
+      card.className = "incident-card ok";
+      card.textContent = "目前沒有進行中的服務異常事件。";
+      incidentsEl.appendChild(card);
+    } else {
+      for (const inc of CONFIG.activeIncidents) {
+        const card = document.createElement("div");
+        card.className = "incident-card " + inc.type;
+
+        const head = document.createElement("div");
+        head.className = "incident-head";
+
+        const title = document.createElement("div");
+        title.className = "incident-title";
+        title.textContent = inc.title;
+
+        const pill = document.createElement("span");
+        pill.className = "status-pill " + inc.type;
+        const dot = document.createElement("span");
+        dot.className = "dot " + inc.type;
+        pill.appendChild(dot);
+        pill.appendChild(document.createTextNode(inc.badge));
+
+        head.appendChild(title);
+        head.appendChild(pill);
+        card.appendChild(head);
+
+        for (const it of inc.items) {
+          const itemBox = document.createElement("div");
+          itemBox.className = "incident-item";
+
+          const t = document.createElement("div");
+          t.className = "incident-time";
+          t.textContent = it.time;
+
+          const d = document.createElement("div");
+          d.textContent = it.detail;
+
+          itemBox.appendChild(t);
+          itemBox.appendChild(d);
+          card.appendChild(itemBox);
+        }
+
+        if (inc.linkUrl) {
+          const a = document.createElement("a");
+          a.className = "incident-link";
+          a.href = inc.linkUrl;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.textContent = inc.linkText;
+          card.appendChild(a);
+        }
+        incidentsEl.appendChild(card);
+      }
+    }
+
+    // 渲染同學分類面板
+    const groupsEl = document.getElementById("groups-list");
+    for (const g of CONFIG.groups) {
+      let gStatus = "ok";
+      for (const s of g.services) {
+        if (PRIORITY[s.status] > PRIORITY[gStatus]) gStatus = s.status;
+      }
+
+      const card = document.createElement("div");
+      card.className = "group-card" + (g.openByDefault ? " open" : "");
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "group-header";
+      btn.onclick = () => card.classList.toggle("open");
+
+      const left = document.createElement("div");
+      left.className = "group-left";
+
+      const chev = document.createElement("span");
+      chev.className = "chevron";
+      chev.textContent = "▶";
+
+      const name = document.createElement("span");
+      name.className = "group-name";
+      name.textContent = g.name;
+
+      left.appendChild(chev);
+      left.appendChild(name);
+
+      if (g.tag) {
+        const tag = document.createElement("span");
+        tag.className = "group-tag";
+        tag.textContent = g.tag;
+        left.appendChild(tag);
+      }
+
+      const pill = document.createElement("span");
+      pill.className = "status-pill " + gStatus;
+      const dot = document.createElement("span");
+      dot.className = "dot " + gStatus;
+      pill.appendChild(dot);
+      pill.appendChild(document.createTextNode(GROUP_LABEL[gStatus]));
+
+      btn.appendChild(left);
+      btn.appendChild(pill);
+      card.appendChild(btn);
+
+      const body = document.createElement("div");
+      body.className = "group-body";
+
+      for (const s of g.services) {
+        const row = document.createElement("div");
+        row.className = "service-row";
+
+        const info = document.createElement("div");
+        info.className = "svc-info";
+        const sName = document.createElement("div");
+        sName.className = "svc-name";
+        sName.textContent = s.name;
+        const sDesc = document.createElement("div");
+        sDesc.className = "svc-desc";
+        sDesc.textContent = s.desc;
+        info.appendChild(sName);
+        info.appendChild(sDesc);
+
+        const right = document.createElement("div");
+        right.className = "svc-right";
+
+        // 20 格近期狀態長條
+        const bars = document.createElement("div");
+        bars.className = "uptime-bars";
+        for (let i = 0; i < 20; i++) {
+          const b = document.createElement("span");
+          b.className = "bar" + (i === 19 && s.status !== "ok" ? " " + s.status : "");
+          bars.appendChild(b);
+        }
+
+        const stText = document.createElement("span");
+        stText.className = "svc-status-text " + s.status;
+        stText.textContent = s.label;
+
+        right.appendChild(bars);
+        right.appendChild(stText);
+
+        row.appendChild(info);
+        row.appendChild(right);
+        body.appendChild(row);
+      }
+
+      card.appendChild(body);
+      groupsEl.appendChild(card);
+    }
+
+    // 全部展開 / 收合
+    document.getElementById("toggle-all-btn").onclick = () => {
+      const cards = document.querySelectorAll(".group-card");
+      const anyClosed = Array.from(cards).some(c => !c.classList.contains("open"));
+      cards.forEach(c => c.classList.toggle("open", anyClosed));
+    };
+
+    // 歷史紀錄
+    const historyEl = document.getElementById("history-list");
+    for (const h of CONFIG.history) {
+      const item = document.createElement("div");
+      item.className = "history-item";
+
+      const date = document.createElement("div");
+      date.className = "history-date";
+      date.textContent = h.date;
+
+      const title = document.createElement("div");
+      title.className = "history-title";
+      title.textContent = h.title;
+
+      const detail = document.createElement("div");
+      detail.className = "history-detail";
+      detail.textContent = h.detail;
+
+      item.appendChild(date);
+      item.appendChild(title);
+      item.appendChild(detail);
+      historyEl.appendChild(item);
+    }
+  </script>
+</body>
+</html>
