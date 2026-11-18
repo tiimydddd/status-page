@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>STCA 學生行動服務狀態</title>
+  <title>STCA 同學手機 Service Health Status</title>
   <style>
     :root {
       --navy: #191b1d;
@@ -32,7 +32,7 @@
 
     .topbar {
       background: var(--navy);
-      color: #FF0000;
+      color: #ffffff;
       padding: 20px 16px;
       border-bottom: 1px solid #393b3d;
     }
@@ -408,7 +408,7 @@
 
   <script>
     const CONFIG = {
-      lastUpdated: "2026-11-18 11:26 (UTC+8)",
+      lastUpdated: "2026-11-18 11:41 (UTC+8)",
       bannerSubText: "受影響：永晞、明曦（Apple）／ 芯而（預計 12:00 全線正常）",
 
       activeIncidents: [
@@ -666,11 +666,12 @@
           const right = document.createElement("div");
           right.className = "svc-right";
 
+          // 只要不是 ok（例如 down 中斷），20 格全部顯示對應顏色（ALL RED, NO GREEN）
           const bars = document.createElement("div");
           bars.className = "uptime-bars";
           for (let i = 0; i < 20; i++) {
             const b = document.createElement("span");
-            b.className = "bar" + (i === 19 && s.status !== "ok" ? " " + s.status : "");
+            b.className = "bar" + (s.status !== "ok" ? " " + s.status : "");
             bars.appendChild(b);
           }
 
