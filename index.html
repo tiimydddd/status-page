@@ -1,398 +1,117 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STCA 同學手機 Service Health Status</title>
-    <style>
-        :root {
-            --bg-color: #f3f2f1;
-            --surface-color: #ffffff;
-            --text-primary: #201f1e;
-            --text-secondary: #605e5c;
-            --border-color: #edebe9;
-            --green: #107c10;
-            --green-bg: #dff6dd;
-            --yellow: #f7630c;
-            --yellow-bg: #fff1f0;
-            --red: #d13438;
-            --red-bg: #fde7e9;
-            --accent: #0078d4;
-        }
-
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--surface-color);
-            padding: 20px 24px;
-            border-radius: 8px;
-            box-shadow: 0 1.6px 3.6px rgba(0,0,0,0.1), 0 0.3px 0.9px rgba(0,0,0,0.07);
-            margin-bottom: 20px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .logo-img {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            object-fit: cover;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        }
-
-        h1 {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .subtitle {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        /* Student Tabs Switcher */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-
-        .tab-btn {
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
-            white-space: nowrap;
-        }
-
-        .tab-btn:hover {
-            background: #f1f0ef;
-            color: var(--text-primary);
-        }
-
-        .tab-btn.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-            box-shadow: 0 2px 4px rgba(0,120,212,0.3);
-        }
-
-        /* Student Card */
-        .card {
-            background: var(--surface-color);
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 1.6px 3.6px rgba(0,0,0,0.1), 0 0.3px 0.9px rgba(0,0,0,0.07);
-            margin-bottom: 16px;
-            display: none;
-        }
-
-        .card.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 16px;
-            margin-bottom: 20px;
-        }
-
-        .student-name {
-            font-size: 22px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .badge {
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .badge.green { background: var(--green-bg); color: var(--green); }
-        .badge.yellow { background: var(--yellow-bg); color: var(--yellow); }
-        .badge.red { background: var(--red-bg); color: var(--red); }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-        }
-
-        .grid-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: #faf9f8;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-        }
-
-        .status-label {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .status-val {
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-val.green { color: var(--green); }
-        .status-val.yellow { color: var(--yellow); }
-        .status-val.red { color: var(--red); }
-
-        .notice-box {
-            background: #fff9f9;
-            border-left: 4px solid var(--red);
-            padding: 14px 16px;
-            border-radius: 4px;
-            margin-top: 16px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .notice-box.yellow-notice {
-            background: #fffaf4;
-            border-left-color: var(--yellow);
-        }
-
-        .apple-link-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .apple-link-btn:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <!-- Header -->
-    <header>
-        <div class="header-left">
-            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" id="logoImg" class="logo-img" alt="STCA Logo">
-            <div>
-                <h1>STCA 同學手機 Service Health Status</h1>
-                <div class="subtitle">實時通訊、遊戲及生態系統服務監控</div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Student Switcher Tabs -->
-    <div class="tabs" id="studentTabs">
-        <button class="tab-btn active" onclick="switchStudent('yuelin')">岳林</button>
-        <button class="tab-btn" onclick="switchStudent('yongxi')">永晞</button>
-        <button class="tab-btn" onclick="switchStudent('xiner')">芯而</button>
-        <button class="tab-btn" onclick="switchStudent('mingxi')">明曦</button>
-        <button class="tab-btn" onclick="switchStudent('timmy')">TIMMY</button>
-    </div>
-
-    <!-- 1. 岳林 -->
-    <div id="card-yuelin" class="card active">
-        <div class="card-header">
-            <h2 class="student-name">岳林</h2>
-            <span class="badge green">● 全部正常</span>
-        </div>
-        <div class="section-title">通訊 Apps 狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">WhatsApp</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Discord</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Instagram (IG)</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Facebook</span><span class="status-val green">● 正常</span></div>
-        </div>
-        <div class="section-title">遊戲狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">Roblox</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Minecraft</span><span class="status-val green">● 正常</span></div>
-        </div>
-    </div>
-
-    <!-- 2. 永晞 -->
-    <div id="card-yongxi" class="card">
-        <div class="card-header">
-            <h2 class="student-name">永晞</h2>
-            <span class="badge yellow">● Apple 服務警告</span>
-        </div>
-        <div class="section-title">通訊 Apps 狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">WhatsApp</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Discord</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Instagram (IG)</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Facebook</span><span class="status-val green">● 正常</span></div>
-        </div>
-        <div class="section-title">遊戲狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">Roblox</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Minecraft</span><span class="status-val green">● 正常</span></div>
-        </div>
-        <div class="section-title">Apple 專屬服務</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">Apple 生態 / Store / Music / Server</span><span class="status-val yellow">● 異常／有延誤風險</span></div>
-        </div>
-        <div class="notice-box yellow-notice">
-            <strong>注意：</strong> APPLE 系統與相關伺服器目前出問題，可能導致登入或服務延誤。<br>
-            <a href="https://developer.apple.com/system-status/" target="_blank" class="apple-link-btn">🔗 查閱 Apple Developer System Status 官方通報 
-            Apple Developer System Status 顯示 <strong>App Store Connect</strong> 目前發生 <strong>2 次服務中斷</strong>（所有用戶均受影響，官方正在努力解決中）：<br>
-• <strong>今天凌晨 2:57 - 持續進行中：</strong>用戶在使用此服務時遇到問題。<br>
-• <strong>今天凌晨 12:50 - 持續進行中：</strong>用戶在使用此服務時遇到問題。 </a>
-        </div>
-    </div>
-
-    <!-- 3. 芯而 -->
-    <div id="card-xiner" class="card">
-        <div class="card-header">
-            <h2 class="student-name">芯而</h2>
-            <span class="badge red">● 硬件突發故障（換機中）</span>
-        </div>
-        <div class="section-title">通訊 Apps 狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">WhatsApp</span><span class="status-val red">● 中斷 (換機中)</span></div>
-            <div class="status-item"><span class="status-label">Discord</span><span class="status-val red">● 中斷 (換機中)</span></div>
-            <div class="status-item"><span class="status-label">Instagram (IG)</span><span class="status-val red">● 中斷 (換機中)</span></div>
-            <div class="status-item"><span class="status-label">Facebook</span><span class="status-val red">● 中斷 (換機中)</span></div>
-        </div>
-        <div class="section-title">遊戲狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">Roblox</span><span class="status-val red">● 中斷 (換機中)</span></div>
-            <div class="status-item"><span class="status-label">Minecraft</span><span class="status-val red">● 中斷 (換機中)</span></div>
-        </div>
-        <div class="notice-box">
-            <strong>狀態詳情：</strong> 舊手機發生硬件突發故障。新手機預計於今日中午 <strong>12:00 PM</strong> 送達並重新上線。
-        </div>
-    </div>
-
-    <!-- 4. 明曦 -->
-    <div id="card-mingxi" class="card">
-        <div class="card-header">
-            <h2 class="student-name">明曦</h2>
-            <span class="badge yellow">● Apple 服務警告</span>
-        </div>
-        <div class="section-title">通訊 Apps 狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">WhatsApp</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Discord</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Instagram (IG)</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Facebook</span><span class="status-val green">● 正常</span></div>
-        </div>
-        <div class="section-title">遊戲狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">Roblox</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Minecraft</span><span class="status-val green">● 正常</span></div>
-        </div>
-        <div class="section-title">Apple 專屬服務</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">Apple 生態 / Store / Music / Server</span><span class="status-val yellow">● 異常／有延誤風險</span></div>
-        </div>
-        <div class="notice-box yellow-notice">
-            <strong>注意：</strong> APPLE 系統與相關伺服器目前出問題，可能導致登入或服務延誤。<br>
-            <a href="https://developer.apple.com/system-status/" target="_blank" class="apple-link-btn">🔗 查閱 Apple Developer System Status 官方通報
-            Apple Developer System Status 顯示 <strong>App Store Connect</strong> 目前發生 <strong>2 次服務中斷</strong>（所有用戶均受影響，官方正在努力解決中）：<br>
-• <strong>今天凌晨 2:57 - 持續進行中：</strong>用戶在使用此服務時遇到問題。<br>
-• <strong>今天凌晨 12:50 - 持續進行中：</strong>用戶在使用此服務時遇到問題。</a>
-        </div>
-    </div>
-
-    <!-- 5. TIMMY -->
-    <div id="card-timmy" class="card">
-        <div class="card-header">
-            <h2 class="student-name">TIMMY</h2>
-            <span class="badge green">● 全部正常</span>
-        </div>
-        <div class="section-title">通訊 Apps 狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">WhatsApp</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Discord</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Instagram (IG)</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Facebook</span><span class="status-val green">● 正常</span></div>
-        </div>
-        <div class="section-title">遊戲狀態</div>
-        <div class="grid-group">
-            <div class="status-item"><span class="status-label">Roblox</span><span class="status-val green">● 正常</span></div>
-            <div class="status-item"><span class="status-label">Minecraft</span><span class="status-val green">● 正常</span></div>
-        </div>
-    </div>
-
-</div>
-
-<script>
-    function switchStudent(studentId) {
-        // 移除所有卡片的 active
-        document.querySelectorAll('.card').forEach(card => {
-            card.classList.remove('active');
-        });
-        // 移除所有分頁按鈕的 active
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        // 啟動點擊的卡片與按鈕
-        document.getElementById('card-' + studentId).classList.add('active');
-        event.currentTarget.classList.add('active');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STCA 同學手機 Service Health Status</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #1f2328;
+      --muted: #59636e;
+      --border: #d8dee4;
+      --primary: #0969da;
+      --green: #1a7f37;
+      --green-bg: #dafbe1;
+      --yellow: #9a6700;
+      --yellow-bg: #fff8c5;
+      --red: #cf222e;
+      --red-bg: #ffebe9;
     }
-</script>
-
-</body>
-</html>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 780px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    header {
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover {
+      border-color: var(--primary);
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #fafbfc;
+    }
+    .student-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .service-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+    .service-row:last-child {
+      border-bottom: none;
+    }
+    .service-name {
+      font-weight: 600;
+    }
+    .service-desc {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .badge {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge
