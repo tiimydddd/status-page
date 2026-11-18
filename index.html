@@ -393,4 +393,327 @@
       <h2 class="section-title">同學手機服務狀態（System Components）</h2>
       <button id="toggle-all-btn" class="toggle-all" type="button">全部展開 / 收合</button>
     </div>
-    <d
+    <div id="groups-list"></div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="dot ok"></span> 正常運作（Operational）</span>
+      <span class="legend-item"><span class="dot warn"></span> 部分異常 / 警告（Degraded）</span>
+      <span class="legend-item"><span class="dot down"></span> 服務中斷（Service Disruption）</span>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title">近期事件紀錄（Incident History）</h2>
+    </div>
+    <div id="history-list" class="history-card"></div>
+
+    <footer>STCA 同學手機 Service Health Status • Powered by GitHub Pages</footer>
+  </main>
+
+  <script>
+    const CONFIG = {
+      lastUpdated: "2026-11-18 13:05 (UTC+8)",
+      bannerSubText: "全員通訊與遊戲正常，僅 Apple 專屬服務黃燈提醒",
+
+      activeIncidents: [
+        {
+          type: "warn",
+          title: "Apple 服務異常提醒：App Store Connect（影響：永晞、明曦）",
+          badge: "黃燈警示 / 進行中",
+          items: [
+            {
+              time: "今天凌晨 2:57 - 持續進行中（所有用戶均受影響）",
+              detail: "用戶在使用此服務時遇到問題。我們正在努力解決此問題。"
+            },
+            {
+              time: "今天凌晨 12:50 - 持續進行中（所有用戶均受影響）",
+              detail: "用戶在使用此服務時遇到問題。我們正在努力解決此問題。"
+            }
+          ],
+          linkText: "查看 Apple Developer System Status 官方頁面 ↗",
+          linkUrl: "https://developer.apple.com/system-status/"
+        }
+      ],
+
+      groups: [
+        {
+          name: "岳林",
+          tag: "全線正常",
+          openByDefault: false,
+          services: [
+            { name: "通訊 Apps", desc: "WhatsApp / Instagram / WeChat", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "一般連線與娛樂應用", status: "ok", label: "正常運作" }
+          ]
+        },
+        {
+          name: "永晞",
+          tag: "Apple 黃燈",
+          openByDefault: true,
+          services: [
+            { name: "通訊 Apps", desc: "日常訊息與聯絡", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "一般連線與娛樂應用", status: "ok", label: "正常運作" },
+            { name: "Apple 專屬服務", desc: "App Store Connect 異常提醒", status: "warn", label: "異常 / 黃燈警示" }
+          ]
+        },
+        {
+          name: "芯而",
+          tag: "12:00 已全線正常",
+          openByDefault: true,
+          services: [
+            { name: "通訊 Apps", desc: "12:00 新手機已上線，全線正常", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "12:00 新手機已上線，全線正常", status: "ok", label: "正常運作" }
+          ]
+        },
+        {
+          name: "明曦",
+          tag: "Apple 黃燈",
+          openByDefault: true,
+          services: [
+            { name: "通訊 Apps", desc: "日常訊息與聯絡", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "一般連線與娛樂應用", status: "ok", label: "正常運作" },
+            { name: "Apple 專屬服務", desc: "App Store Connect 異常提醒", status: "warn", label: "異常 / 黃燈警示" }
+          ]
+        },
+        {
+          name: "TIMMY",
+          tag: "全線正常",
+          openByDefault: false,
+          services: [
+            { name: "通訊 Apps", desc: "日常訊息與聯絡", status: "ok", label: "正常運作" },
+            { name: "遊戲狀態", desc: "一般連線與娛樂應用", status: "ok", label: "正常運作" }
+          ]
+        }
+      ],
+
+      history: [
+        {
+          date: "2026年11月18日 12:00",
+          title: "【已解決】芯而手機恢復全線正常",
+          detail: "新手機已於中午 12:00 正式上線，通訊 Apps 與遊戲狀態均恢復正常運作。"
+        },
+        {
+          date: "2026年11月18日 02:57 & 00:50",
+          title: "【黃燈警示】App Store Connect 服務異常",
+          detail: "Apple 官方通報所有用戶均受影響（僅永晞、明曦之 Apple 專屬服務標示為黃燈警示）。"
+        }
+      ]
+    };
+
+    try {
+      const PRIORITY = { ok: 0, warn: 1, down: 2 };
+      const GROUP_LABEL = {
+        ok: "全線正常（Operational）",
+        warn: "Apple 警示（Degraded）",
+        down: "服務中斷（Disruption）"
+      };
+
+      document.getElementById("last-updated").textContent = CONFIG.lastUpdated;
+
+      let overall = "ok";
+      for (const g of CONFIG.groups) {
+        for (const s of g.services) {
+          const p = PRIORITY[s.status] ?? 0;
+          if (p > PRIORITY[overall]) overall = s.status;
+        }
+      }
+
+      const bannerEl = document.getElementById("overall-banner");
+      bannerEl.className = "overall-banner " + overall;
+      const bannerText = {
+        ok: "所有系統與同學手機服務運作正常",
+        warn: "整體正常運作，僅 Apple 專屬服務黃燈警示",
+        down: "部分服務目前發生中斷（Service Disruption）"
+      };
+      const bannerMain = document.createElement("span");
+      bannerMain.textContent = bannerText[overall];
+      const bannerSub = document.createElement("span");
+      bannerSub.className = "overall-sub";
+      bannerSub.textContent = CONFIG.bannerSubText;
+      bannerEl.appendChild(bannerMain);
+      bannerEl.appendChild(bannerSub);
+
+      const incidentsEl = document.getElementById("active-incidents");
+      if (CONFIG.activeIncidents.length === 0) {
+        const card = document.createElement("div");
+        card.className = "incident-card ok";
+        card.textContent = "目前沒有進行中的服務異常事件。";
+        incidentsEl.appendChild(card);
+      } else {
+        for (const inc of CONFIG.activeIncidents) {
+          const card = document.createElement("div");
+          card.className = "incident-card " + inc.type;
+
+          const head = document.createElement("div");
+          head.className = "incident-head";
+
+          const title = document.createElement("div");
+          title.className = "incident-title";
+          title.textContent = inc.title;
+
+          const pill = document.createElement("span");
+          pill.className = "status-pill " + inc.type;
+          const dot = document.createElement("span");
+          dot.className = "dot " + inc.type;
+          pill.appendChild(dot);
+          pill.appendChild(document.createTextNode(inc.badge));
+
+          head.appendChild(title);
+          head.appendChild(pill);
+          card.appendChild(head);
+
+          for (const it of inc.items) {
+            const itemBox = document.createElement("div");
+            itemBox.className = "incident-item";
+
+            const t = document.createElement("div");
+            t.className = "incident-time";
+            t.textContent = it.time;
+
+            const d = document.createElement("div");
+            d.textContent = it.detail;
+
+            itemBox.appendChild(t);
+            itemBox.appendChild(d);
+            card.appendChild(itemBox);
+          }
+
+          if (inc.linkUrl) {
+            const a = document.createElement("a");
+            a.className = "incident-link";
+            a.href = inc.linkUrl;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.textContent = inc.linkText;
+            card.appendChild(a);
+          }
+          incidentsEl.appendChild(card);
+        }
+      }
+
+      const groupsEl = document.getElementById("groups-list");
+      for (const g of CONFIG.groups) {
+        let gStatus = "ok";
+        for (const s of g.services) {
+          const p = PRIORITY[s.status] ?? 0;
+          if (p > PRIORITY[gStatus]) gStatus = s.status;
+        }
+
+        const card = document.createElement("div");
+        card.className = "group-card" + (g.openByDefault ? " open" : "");
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "group-header";
+        btn.onclick = () => card.classList.toggle("open");
+
+        const left = document.createElement("div");
+        left.className = "group-left";
+
+        const chev = document.createElement("span");
+        chev.className = "chevron";
+        chev.textContent = "▶";
+
+        const name = document.createElement("span");
+        name.className = "group-name";
+        name.textContent = g.name;
+
+        left.appendChild(chev);
+        left.appendChild(name);
+
+        if (g.tag) {
+          const tag = document.createElement("span");
+          tag.className = "group-tag";
+          tag.textContent = g.tag;
+          left.appendChild(tag);
+        }
+
+        const pill = document.createElement("span");
+        pill.className = "status-pill " + gStatus;
+        const dot = document.createElement("span");
+        dot.className = "dot " + gStatus;
+        pill.appendChild(dot);
+        pill.appendChild(document.createTextNode(GROUP_LABEL[gStatus]));
+
+        btn.appendChild(left);
+        btn.appendChild(pill);
+        card.appendChild(btn);
+
+        const body = document.createElement("div");
+        body.className = "group-body";
+
+        for (const s of g.services) {
+          const row = document.createElement("div");
+          row.className = "service-row";
+
+          const info = document.createElement("div");
+          info.className = "svc-info";
+          const sName = document.createElement("div");
+          sName.className = "svc-name";
+          sName.textContent = s.name;
+          const sDesc = document.createElement("div");
+          sDesc.className = "svc-desc";
+          sDesc.textContent = s.desc;
+          info.appendChild(sName);
+          info.appendChild(sDesc);
+
+          const right = document.createElement("div");
+          right.className = "svc-right";
+
+          const bars = document.createElement("div");
+          bars.className = "uptime-bars";
+          for (let i = 0; i < 20; i++) {
+            const b = document.createElement("span");
+            b.className = "bar" + (s.status !== "ok" ? " " + s.status : "");
+            bars.appendChild(b);
+          }
+
+          const stText = document.createElement("span");
+          stText.className = "svc-status-text " + s.status;
+          stText.textContent = s.label;
+
+          right.appendChild(bars);
+          right.appendChild(stText);
+
+          row.appendChild(info);
+          row.appendChild(right);
+          body.appendChild(row);
+        }
+
+        card.appendChild(body);
+        groupsEl.appendChild(card);
+      }
+
+      document.getElementById("toggle-all-btn").onclick = () => {
+        const cards = document.querySelectorAll(".group-card");
+        const anyClosed = Array.from(cards).some(c => !c.classList.contains("open"));
+        cards.forEach(c => c.classList.toggle("open", anyClosed));
+      };
+
+      const historyEl = document.getElementById("history-list");
+      for (const h of CONFIG.history) {
+        const item = document.createElement("div");
+        item.className = "history-item";
+
+        const date = document.createElement("div");
+        date.className = "history-date";
+        date.textContent = h.date;
+
+        const title = document.createElement("div");
+        title.className = "history-title";
+        title.textContent = h.title;
+
+        const detail = document.createElement("div");
+        detail.className = "history-detail";
+        detail.textContent = h.detail;
+
+        item.appendChild(date);
+        item.appendChild(title);
+        item.appendChild(detail);
+        historyEl.appendChild(item);
+      }
+    } catch (err) {
+      document.getElementById("overall-banner").className = "overall-banner down";
+      document.getElementById("overall-banner").textContent = "頁面載入異常：" + err.message;
+    }
+  </script>
+</body>
+</html>
