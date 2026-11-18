@@ -30,7 +30,6 @@
       line-height: 1.5;
     }
 
-    /* 頂部深色頁首（仿 Roblox Status） */
     .topbar {
       background: var(--navy);
       color: #ffffff;
@@ -54,6 +53,7 @@
     .brand-mark {
       width: 34px;
       height: 34px;
+      flex-shrink: 0;
       border-radius: 8px;
       background: linear-gradient(135deg, #ffffff 0%, #c8cdd2 100%);
       color: var(--navy);
@@ -87,7 +87,6 @@
       padding: 0 16px;
     }
 
-    /* 整體狀態橫幅 */
     .overall-banner {
       padding: 16px 20px;
       border-radius: 8px;
@@ -111,11 +110,12 @@
       opacity: 0.95;
     }
 
-    /* 區塊標題 */
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
       margin: 26px 0 12px;
     }
     .section-title {
@@ -135,7 +135,6 @@
     }
     .toggle-all:hover { text-decoration: underline; }
 
-    /* 進行中事件卡片 */
     .incident-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -179,7 +178,6 @@
     }
     .incident-link:hover { text-decoration: underline; }
 
-    /* 可展開同學分類面板 */
     .group-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -195,6 +193,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
       cursor: pointer;
       text-align: left;
       font-family: inherit;
@@ -203,7 +203,8 @@
     .group-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     .chevron {
       font-size: 12px;
@@ -244,6 +245,7 @@
       height: 8px;
       border-radius: 50%;
       display: inline-block;
+      flex-shrink: 0;
     }
     .dot.ok { background: var(--ok); }
     .dot.warn { background: var(--warn); }
@@ -263,14 +265,16 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
     .service-row:last-child { border-bottom: none; }
-    .svc-info { min-width: 180px; }
+    .svc-info {
+      flex: 1;
+      min-width: 180px;
+    }
     .svc-name { font-weight: 600; font-size: 14px; }
     .svc-desc { font-size: 12px; color: var(--muted); }
 
-    /* 狀態長條圖（仿 Roblox Status / Status.io） */
     .svc-right {
       display: flex;
       align-items: center;
@@ -300,7 +304,6 @@
     .svc-status-text.warn { color: #9c6200; }
     .svc-status-text.down { color: #b51912; }
 
-    /* 圖例列 */
     .legend {
       background: var(--card);
       border: 1px solid var(--border);
@@ -319,7 +322,6 @@
       gap: 6px;
     }
 
-    /* 歷史事件紀錄 */
     .history-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -357,6 +359,8 @@
     @media (max-width: 600px) {
       .service-row { padding-left: 20px; }
       .uptime-bars { display: none; }
+      .svc-right { margin-left: 0; }
+      .svc-status-text { min-width: auto; text-align: left; }
     }
   </style>
 </head>
@@ -403,18 +407,10 @@
   </main>
 
   <script>
-    // =====================================================
-    // 【每次要更新狀態，只需要修改這裡的 CONFIG】
-    // status 可用值：
-    //   "ok"   -> 正常運作（綠燈）
-    //   "warn" -> 部分異常 / 維護中（黃燈）
-    //   "down" -> 服務中斷（紅燈）
-    // =====================================================
     const CONFIG = {
-      lastUpdated: "2026-11-18 11:24 (UTC+8)",
+      lastUpdated: "2026-11-18 11:26 (UTC+8)",
       bannerSubText: "受影響：永晞、明曦（Apple）／ 芯而（預計 12:00 全線正常）",
 
-      // 進行中事件（如果沒有進行中事件，可設為空陣列 []）
       activeIncidents: [
         {
           type: "down",
@@ -446,7 +442,6 @@
         }
       ],
 
-      // 各同學分組（像 Roblox Status 的分類面板）
       groups: [
         {
           name: "岳林",
@@ -497,7 +492,6 @@
         }
       ],
 
-      // 歷史紀錄
       history: [
         {
           date: "2026年11月18日（進行中）",
@@ -512,221 +506,221 @@
       ]
     };
 
-    // ======= 畫面自動產生程式（以下通常無需修改） =======
-    const PRIORITY = { ok: 0, warn: 1, down: 2 };
-    const GROUP_LABEL = {
-      ok: "全線正常（Operational）",
-      warn: "部分異常（Degraded）",
-      down: "服務中斷（Disruption）"
-    };
+    try {
+      const PRIORITY = { ok: 0, warn: 1, down: 2 };
+      const GROUP_LABEL = {
+        ok: "全線正常（Operational）",
+        warn: "部分異常（Degraded）",
+        down: "服務中斷（Disruption）"
+      };
 
-    document.getElementById("last-updated").textContent = CONFIG.lastUpdated;
+      document.getElementById("last-updated").textContent = CONFIG.lastUpdated;
 
-    // 計算整體狀態
-    let overall = "ok";
-    for (const g of CONFIG.groups) {
-      for (const s of g.services) {
-        if (PRIORITY[s.status] > PRIORITY[overall]) overall = s.status;
+      let overall = "ok";
+      for (const g of CONFIG.groups) {
+        for (const s of g.services) {
+          const p = PRIORITY[s.status] ?? 0;
+          if (p > PRIORITY[overall]) overall = s.status;
+        }
       }
-    }
 
-    const bannerEl = document.getElementById("overall-banner");
-    bannerEl.className = "overall-banner " + overall;
-    const bannerText = {
-      ok: "所有系統與同學手機服務運作正常",
-      warn: "部分服務出現延遲或維護中",
-      down: "部分服務目前發生中斷（Service Disruption）"
-    };
-    const bannerMain = document.createElement("span");
-    bannerMain.textContent = bannerText[overall];
-    const bannerSub = document.createElement("span");
-    bannerSub.className = "overall-sub";
-    bannerSub.textContent = CONFIG.bannerSubText;
-    bannerEl.appendChild(bannerMain);
-    bannerEl.appendChild(bannerSub);
+      const bannerEl = document.getElementById("overall-banner");
+      bannerEl.className = "overall-banner " + overall;
+      const bannerText = {
+        ok: "所有系統與同學手機服務運作正常",
+        warn: "部分服務出現延遲或維護中",
+        down: "部分服務目前發生中斷（Service Disruption）"
+      };
+      const bannerMain = document.createElement("span");
+      bannerMain.textContent = bannerText[overall];
+      const bannerSub = document.createElement("span");
+      bannerSub.className = "overall-sub";
+      bannerSub.textContent = CONFIG.bannerSubText;
+      bannerEl.appendChild(bannerMain);
+      bannerEl.appendChild(bannerSub);
 
-    // 進行中事件
-    const incidentsEl = document.getElementById("active-incidents");
-    if (CONFIG.activeIncidents.length === 0) {
-      const card = document.createElement("div");
-      card.className = "incident-card ok";
-      card.textContent = "目前沒有進行中的服務異常事件。";
-      incidentsEl.appendChild(card);
-    } else {
-      for (const inc of CONFIG.activeIncidents) {
+      const incidentsEl = document.getElementById("active-incidents");
+      if (CONFIG.activeIncidents.length === 0) {
         const card = document.createElement("div");
-        card.className = "incident-card " + inc.type;
+        card.className = "incident-card ok";
+        card.textContent = "目前沒有進行中的服務異常事件。";
+        incidentsEl.appendChild(card);
+      } else {
+        for (const inc of CONFIG.activeIncidents) {
+          const card = document.createElement("div");
+          card.className = "incident-card " + inc.type;
 
-        const head = document.createElement("div");
-        head.className = "incident-head";
+          const head = document.createElement("div");
+          head.className = "incident-head";
 
-        const title = document.createElement("div");
-        title.className = "incident-title";
-        title.textContent = inc.title;
+          const title = document.createElement("div");
+          title.className = "incident-title";
+          title.textContent = inc.title;
+
+          const pill = document.createElement("span");
+          pill.className = "status-pill " + inc.type;
+          const dot = document.createElement("span");
+          dot.className = "dot " + inc.type;
+          pill.appendChild(dot);
+          pill.appendChild(document.createTextNode(inc.badge));
+
+          head.appendChild(title);
+          head.appendChild(pill);
+          card.appendChild(head);
+
+          for (const it of inc.items) {
+            const itemBox = document.createElement("div");
+            itemBox.className = "incident-item";
+
+            const t = document.createElement("div");
+            t.className = "incident-time";
+            t.textContent = it.time;
+
+            const d = document.createElement("div");
+            d.textContent = it.detail;
+
+            itemBox.appendChild(t);
+            itemBox.appendChild(d);
+            card.appendChild(itemBox);
+          }
+
+          if (inc.linkUrl) {
+            const a = document.createElement("a");
+            a.className = "incident-link";
+            a.href = inc.linkUrl;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.textContent = inc.linkText;
+            card.appendChild(a);
+          }
+          incidentsEl.appendChild(card);
+        }
+      }
+
+      const groupsEl = document.getElementById("groups-list");
+      for (const g of CONFIG.groups) {
+        let gStatus = "ok";
+        for (const s of g.services) {
+          const p = PRIORITY[s.status] ?? 0;
+          if (p > PRIORITY[gStatus]) gStatus = s.status;
+        }
+
+        const card = document.createElement("div");
+        card.className = "group-card" + (g.openByDefault ? " open" : "");
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "group-header";
+        btn.onclick = () => card.classList.toggle("open");
+
+        const left = document.createElement("div");
+        left.className = "group-left";
+
+        const chev = document.createElement("span");
+        chev.className = "chevron";
+        chev.textContent = "▶";
+
+        const name = document.createElement("span");
+        name.className = "group-name";
+        name.textContent = g.name;
+
+        left.appendChild(chev);
+        left.appendChild(name);
+
+        if (g.tag) {
+          const tag = document.createElement("span");
+          tag.className = "group-tag";
+          tag.textContent = g.tag;
+          left.appendChild(tag);
+        }
 
         const pill = document.createElement("span");
-        pill.className = "status-pill " + inc.type;
+        pill.className = "status-pill " + gStatus;
         const dot = document.createElement("span");
-        dot.className = "dot " + inc.type;
+        dot.className = "dot " + gStatus;
         pill.appendChild(dot);
-        pill.appendChild(document.createTextNode(inc.badge));
+        pill.appendChild(document.createTextNode(GROUP_LABEL[gStatus]));
 
-        head.appendChild(title);
-        head.appendChild(pill);
-        card.appendChild(head);
+        btn.appendChild(left);
+        btn.appendChild(pill);
+        card.appendChild(btn);
 
-        for (const it of inc.items) {
-          const itemBox = document.createElement("div");
-          itemBox.className = "incident-item";
+        const body = document.createElement("div");
+        body.className = "group-body";
 
-          const t = document.createElement("div");
-          t.className = "incident-time";
-          t.textContent = it.time;
+        for (const s of g.services) {
+          const row = document.createElement("div");
+          row.className = "service-row";
 
-          const d = document.createElement("div");
-          d.textContent = it.detail;
+          const info = document.createElement("div");
+          info.className = "svc-info";
+          const sName = document.createElement("div");
+          sName.className = "svc-name";
+          sName.textContent = s.name;
+          const sDesc = document.createElement("div");
+          sDesc.className = "svc-desc";
+          sDesc.textContent = s.desc;
+          info.appendChild(sName);
+          info.appendChild(sDesc);
 
-          itemBox.appendChild(t);
-          itemBox.appendChild(d);
-          card.appendChild(itemBox);
+          const right = document.createElement("div");
+          right.className = "svc-right";
+
+          const bars = document.createElement("div");
+          bars.className = "uptime-bars";
+          for (let i = 0; i < 20; i++) {
+            const b = document.createElement("span");
+            b.className = "bar" + (i === 19 && s.status !== "ok" ? " " + s.status : "");
+            bars.appendChild(b);
+          }
+
+          const stText = document.createElement("span");
+          stText.className = "svc-status-text " + s.status;
+          stText.textContent = s.label;
+
+          right.appendChild(bars);
+          right.appendChild(stText);
+
+          row.appendChild(info);
+          row.appendChild(right);
+          body.appendChild(row);
         }
 
-        if (inc.linkUrl) {
-          const a = document.createElement("a");
-          a.className = "incident-link";
-          a.href = inc.linkUrl;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-          a.textContent = inc.linkText;
-          card.appendChild(a);
-        }
-        incidentsEl.appendChild(card);
-      }
-    }
-
-    // 渲染同學分類面板
-    const groupsEl = document.getElementById("groups-list");
-    for (const g of CONFIG.groups) {
-      let gStatus = "ok";
-      for (const s of g.services) {
-        if (PRIORITY[s.status] > PRIORITY[gStatus]) gStatus = s.status;
+        card.appendChild(body);
+        groupsEl.appendChild(card);
       }
 
-      const card = document.createElement("div");
-      card.className = "group-card" + (g.openByDefault ? " open" : "");
+      document.getElementById("toggle-all-btn").onclick = () => {
+        const cards = document.querySelectorAll(".group-card");
+        const anyClosed = Array.from(cards).some(c => !c.classList.contains("open"));
+        cards.forEach(c => c.classList.toggle("open", anyClosed));
+      };
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "group-header";
-      btn.onclick = () => card.classList.toggle("open");
+      const historyEl = document.getElementById("history-list");
+      for (const h of CONFIG.history) {
+        const item = document.createElement("div");
+        item.className = "history-item";
 
-      const left = document.createElement("div");
-      left.className = "group-left";
+        const date = document.createElement("div");
+        date.className = "history-date";
+        date.textContent = h.date;
 
-      const chev = document.createElement("span");
-      chev.className = "chevron";
-      chev.textContent = "▶";
+        const title = document.createElement("div");
+        title.className = "history-title";
+        title.textContent = h.title;
 
-      const name = document.createElement("span");
-      name.className = "group-name";
-      name.textContent = g.name;
+        const detail = document.createElement("div");
+        detail.className = "history-detail";
+        detail.textContent = h.detail;
 
-      left.appendChild(chev);
-      left.appendChild(name);
-
-      if (g.tag) {
-        const tag = document.createElement("span");
-        tag.className = "group-tag";
-        tag.textContent = g.tag;
-        left.appendChild(tag);
+        item.appendChild(date);
+        item.appendChild(title);
+        item.appendChild(detail);
+        historyEl.appendChild(item);
       }
-
-      const pill = document.createElement("span");
-      pill.className = "status-pill " + gStatus;
-      const dot = document.createElement("span");
-      dot.className = "dot " + gStatus;
-      pill.appendChild(dot);
-      pill.appendChild(document.createTextNode(GROUP_LABEL[gStatus]));
-
-      btn.appendChild(left);
-      btn.appendChild(pill);
-      card.appendChild(btn);
-
-      const body = document.createElement("div");
-      body.className = "group-body";
-
-      for (const s of g.services) {
-        const row = document.createElement("div");
-        row.className = "service-row";
-
-        const info = document.createElement("div");
-        info.className = "svc-info";
-        const sName = document.createElement("div");
-        sName.className = "svc-name";
-        sName.textContent = s.name;
-        const sDesc = document.createElement("div");
-        sDesc.className = "svc-desc";
-        sDesc.textContent = s.desc;
-        info.appendChild(sName);
-        info.appendChild(sDesc);
-
-        const right = document.createElement("div");
-        right.className = "svc-right";
-
-        // 20 格近期狀態長條
-        const bars = document.createElement("div");
-        bars.className = "uptime-bars";
-        for (let i = 0; i < 20; i++) {
-          const b = document.createElement("span");
-          b.className = "bar" + (i === 19 && s.status !== "ok" ? " " + s.status : "");
-          bars.appendChild(b);
-        }
-
-        const stText = document.createElement("span");
-        stText.className = "svc-status-text " + s.status;
-        stText.textContent = s.label;
-
-        right.appendChild(bars);
-        right.appendChild(stText);
-
-        row.appendChild(info);
-        row.appendChild(right);
-        body.appendChild(row);
-      }
-
-      card.appendChild(body);
-      groupsEl.appendChild(card);
-    }
-
-    // 全部展開 / 收合
-    document.getElementById("toggle-all-btn").onclick = () => {
-      const cards = document.querySelectorAll(".group-card");
-      const anyClosed = Array.from(cards).some(c => !c.classList.contains("open"));
-      cards.forEach(c => c.classList.toggle("open", anyClosed));
-    };
-
-    // 歷史紀錄
-    const historyEl = document.getElementById("history-list");
-    for (const h of CONFIG.history) {
-      const item = document.createElement("div");
-      item.className = "history-item";
-
-      const date = document.createElement("div");
-      date.className = "history-date";
-      date.textContent = h.date;
-
-      const title = document.createElement("div");
-      title.className = "history-title";
-      title.textContent = h.title;
-
-      const detail = document.createElement("div");
-      detail.className = "history-detail";
-      detail.textContent = h.detail;
-
-      item.appendChild(date);
-      item.appendChild(title);
-      item.appendChild(detail);
-      historyEl.appendChild(item);
+    } catch (err) {
+      document.getElementById("overall-banner").className = "overall-banner down";
+      document.getElementById("overall-banner").textContent = "頁面載入異常：" + err.message;
     }
   </script>
 </body>
